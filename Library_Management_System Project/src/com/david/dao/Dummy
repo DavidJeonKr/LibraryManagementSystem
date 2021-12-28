@@ -1,0 +1,110 @@
+package com.david.dao;
+
+import static com.david.ojdbc.OracleJdbc.*;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+
+import com.david.vo.Account;
+
+import oracle.jdbc.OracleDriver;
+
+public class AccountDaoImpl implements AccountDao {
+	
+	private static AccountDaoImpl instance = null;
+	
+	private AccountDaoImpl() {
+		
+	}
+	public static AccountDaoImpl getInstance() {
+		if(instance == null) {
+			instance = new AccountDaoImpl();
+		}
+		return instance;
+	}
+	
+	
+	
+
+	@Override
+	public int insertid(Account account) {
+		int result = 0;
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+
+		try {
+			DriverManager.registerDriver(new OracleDriver());
+			conn = DriverManager.getConnection(URL, USER, PASSWORD);
+
+			String sql = "insert into account(user_name, name, password) values(?,?,?)";
+			pstmt = conn.prepareStatement(sql);
+
+			pstmt.setString(1, account.getUser_name());
+			pstmt.setString(2, account.getName());
+			pstmt.setString(3, account.getPassword());
+
+			int i = pstmt.executeUpdate();
+			if (i > 0) {
+				System.out.println("데이터베이스 인서트 성공");
+			}
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				pstmt.close();
+				conn.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+
+		return result;
+	}
+
+}
+
+@Override
+	public int update(int no) {
+		int result = 0;
+		int rent = 0;
+		try {
+			String issue = "update book set book_rent = 1 where = book_seq = ?" ;
+			String returnbook = "update book set book_rent = 0 where = book_seq = ?" ;
+			String select = "select * from book where book_seq = ?";
+			pstmt = con.connection.prepareStatement(select);
+			pstmt.setInt(1, no);
+			rs = pstmt.executeQuery();
+			if(rs.next()) {
+				rent = rs.getInt("book_rent");
+			}
+			
+			if(rent == 0) {
+				pstmt = con.connection.prepareStatement(issue);
+				pstmt.setInt(1, no);
+				
+				int i = pstmt.executeUpdate();
+				if(i > 0) {
+					result = 1;
+					System.out.println("북 Rent 업데이트 성공(데이트베이스)");
+				}
+			} else if( rent == 1) {
+				pstmt = con.connection.prepareStatement(returnbook);
+				pstmt.setInt(1, no);
+				
+				int i = pstmt.executeUpdate();
+				if(i > 0) {
+					result = 1;
+					System.out.println("북 Rent 업데이트 성공(데이트베이스)");
+				}
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return result;
+	}
+
+
